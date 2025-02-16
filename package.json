@@ -1,0 +1,26 @@
+{
+  "name": "todoentriesservice",
+  "version": "1.0.0",
+  "description": "Service to handle the todo items in the main view",
+  "license": "ISC",
+  "author": "AndreaC",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "npm run build && node --env-file=.env dist/index.js",
+    "startDev": "npm run build && node --env-file=.env.local dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "pg-promise": "^11.10.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/pg": "^8.11.11",
+    "typescript": "^5.7.3"
+  }
+}
