@@ -2,21 +2,21 @@ import pgPromise from "pg-promise";
 import type { IDatabase } from "pg-promise";
 
 const dbConnection = {
-    host: process.env.POST_DB_HOST,
-    port: process.env.POST_DB_PORT,
-    database: process.env.POST_DB_NAME,
-    user: process.env.POST_DB_USER,
-    password: process.env.POST_DB_PASS,
-    max: process.env.POST_DB_MAX_CONNECTIONS
+    host: process.env.TODO_DB_HOST,
+    port: process.env.TODO_DB_PORT,
+    database: process.env.TODO_DB_NAME,
+    user: process.env.TODO_DB_USER,
+    password: process.env.TODO_DB_PASS,
+    max: process.env.TODO_DB_MAX_CONNECTIONS
 };
 
 const dbInitialTesterConnection = {
-    host: process.env.POST_DB_HOST,
-    port: process.env.POST_DB_PORT,
-    database: process.env.POST_DB_ADMIN_NAME,
-    user: process.env.POST_DB_ADMIN_USER,
-    password: process.env.POST_DB_ADMIN_PASS,
-    max: process.env.POST_DB_MAX_CONNECTIONS
+    host: process.env.TODO_DB_HOST,
+    port: process.env.TODO_DB_PORT,
+    database: process.env.TODO_DB_ADMIN_NAME,
+    user: process.env.TODO_DB_ADMIN_USER,
+    password: process.env.TODO_DB_ADMIN_PASS,
+    max: process.env.TODO_DB_MAX_CONNECTIONS
 };
 
 export default async function connectToDb() {
