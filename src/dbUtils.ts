@@ -1,6 +1,5 @@
 import pgPromise from "pg-promise";
 import type { IDatabase } from "pg-promise";
-import type { Client } from "pg";
 
 const dbConnection = {
     host: process.env.POST_DB_HOST,
@@ -14,65 +13,69 @@ const dbConnection = {
 const dbInitialTesterConnection = {
     host: process.env.POST_DB_HOST,
     port: process.env.POST_DB_PORT,
-    database: "postgres",
-    user: "postgres",
-    password: "3jq*.p2*grT-",
+    database: process.env.POST_DB_ADMIN_NAME,
+    user: process.env.POST_DB_ADMIN_USER,
+    password: process.env.POST_DB_ADMIN_PASS,
     max: process.env.POST_DB_MAX_CONNECTIONS
 };
 
-export default function connectToDb() {
+export default async function connectToDb() {
     const pgpToCheckDbExistence = pgPromise({});
-
-    createDbIfDoesNotExist(pgpToCheckDbExistence(dbInitialTesterConnection));
-
     const pgp = pgPromise({});
-    return pgp(dbConnection);
+    const todoEntriesDb: IDatabase<{}> = pgp(dbConnection);
+
+    if (await createDbIfFirstRun(pgpToCheckDbExistence(dbInitialTesterConnection)))
+    {
+        await todoEntriesDb.none(`
+            CREATE TABLE todoentries (
+                id BIGSERIAL PRIMARY KEY,
+                userid bigint,
+                entrycreation timestamp,
+                entryexpiration timestamp,
+                reminder timestamp,
+                title varchar(50),
+                description text,
+                creatorid bigint,
+                assigneeid bigint,
+                executorid bigint,
+                taskcompleted boolean);`
+        );
+    }
+    return todoEntriesDb;
 }
 
-async function createDbIfDoesNotExist(db: IDatabase<{}>): Promise<void> {
+async function createDbIfFirstRun(db: IDatabase<{}>): Promise<boolean> {
     const dbQuery = await db.oneOrNone(`
-        SELECT 1
+        SELECT datname
         FROM pg_database
         WHERE datname = '${dbConnection.database}';`
       );
 
-      // the database doesn't exist, make one and create table
-      if (dbQuery.length == 0) {
-        db.none(`
+      // the database and user doesn't exist, create them
+      if (!dbQuery) {
+        await db.none(`
             CREATE USER ${dbConnection.user}
             WITH CREATEDB LOGIN PASSWORD '${dbConnection.password}';`
         );
 
-        db.none(`
-            GRANT SELECT, INSERT, UPDATE, DELETE
-            ON ALL tables
-            IN schema public
-            TO ${dbConnection.user};`
-        );
-
-        db.none(`
-            GRANT SELECT ON ALL SEQUENCES
-            IN SCHEMA public
-            TO ${dbConnection.user};`
-        );
-        
-        db.none(`
+        await db.none(`
             CREATE DATABASE ${dbConnection.database}
             WITH OWNER ${dbConnection.user};`
         );
 
-        db.none(`
-            CREATE TABLE todoentries (
-                id bigint PRIMARY KEY,
-                userid bigint,
-                entrycreation date,
-                entryexpiration date,
-                reminder date,
-                description text,
-                creator bigint,
-                assignee bigint,
-                executor bigint,
-                taskcompleted boolean);`
+        await db.none(`
+            GRANT SELECT, INSERT, UPDATE, DELETE
+            ON ALL TABLES
+            IN SCHEMA public
+            TO ${dbConnection.user};`
         );
+
+        await db.none(`
+            GRANT SELECT ON ALL SEQUENCES
+            IN SCHEMA public
+            TO ${dbConnection.user};`
+        );
+        return true;
       }
+      return false;
 }
