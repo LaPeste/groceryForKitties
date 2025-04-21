@@ -1,8 +1,8 @@
 import type { Express, Request, Response } from "express";
 import pgPromise, { IMain } from "pg-promise";
 
-export default function setupRouting(app: Express, db: pgPromise.IDatabase<{}>, apiBasePath: string, apiCurrentVersion: string): void {
-    const versionedApiBasePath: string = `${apiBasePath}/${apiCurrentVersion}`;
+export default function setupRouting(app: Express, db: pgPromise.IDatabase<{}>, apiBasePath: string): void {
+    const versionedApiBasePath: string = `${apiBasePath}/v1`;
     const todoEntryTable: string = "todoentries"
 
     app.get(`${versionedApiBasePath}/todoentries/:userId`, async (req: Request, res: Response): Promise<void> => {
@@ -69,6 +69,15 @@ export default function setupRouting(app: Express, db: pgPromise.IDatabase<{}>, 
         );
 
         res.json("Todo entry successfully updated");
+    });
+
+    app.delete(`${versionedApiBasePath}/todoentry`, async (req: Request, res: Response): Promise<void> => {
+        await db.none(`
+            DELETE FROM ${todoEntryTable}
+            WHERE id=${req.query.entryId} AND userid=${req.query.userId};`
+        );
+
+        res.json("Todo entry successfully deleted");
     });
 }
 

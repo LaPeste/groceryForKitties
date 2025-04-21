@@ -14,7 +14,6 @@ declare global {
         PORT: string;
         PWD: string;
         API_BASE_PATH: string;
-        API_CURRENT_VERSION: string;
       }
     }
   }
